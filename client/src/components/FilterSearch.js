@@ -15,6 +15,7 @@ const FilterSearch = ({
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandCategories, setExpandCategories] = useState(false);
+  const [categorySearchTerm, setCategorySearchTerm] = useState('');
 
   useEffect(() => {
     fetchCategories();
@@ -47,12 +48,24 @@ const FilterSearch = ({
     onFilterChange(updatedCategories);
   };
 
+  const handleRemoveCategory = (categoryId) => {
+    const updatedCategories = selectedCategories.filter(
+      (id) => id !== categoryId
+    );
+    setSelectedCategories(updatedCategories);
+    onFilterChange(updatedCategories);
+  };
+
   const handleClearFilters = () => {
     setSearchTerm('');
     setSelectedCategories([]);
     onSearch('');
     onFilterChange([]);
   };
+
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(categorySearchTerm.toLowerCase())
+  );
 
   const hasActiveFilters = searchTerm || selectedCategories.length > 0;
 
@@ -85,11 +98,18 @@ const FilterSearch = ({
 
         {expandCategories && (
           <div className="categories-dropdown">
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={categorySearchTerm}
+              onChange={(e) => setCategorySearchTerm(e.target.value)}
+              className="category-search-input"
+            />
             {loading ? (
               <div className="loading-categories">Loading categories...</div>
             ) : (
               <div className="categories-options">
-                {categories.map((category) => (
+                {filteredCategories.map((category) => (
                   <label key={category._id} className="category-option">
                     <input
                       type="checkbox"
@@ -110,6 +130,29 @@ const FilterSearch = ({
           </button>
         )}
       </div>
+
+      {selectedCategories.length > 0 && (
+        <div className="selected-filters">
+          <div className="selected-filters-label">Selected Categories:</div>
+          <div className="selected-tags">
+            {selectedCategories.map((categoryId) => {
+              const category = categories.find((cat) => cat._id === categoryId);
+              return (
+                <span key={categoryId} className="filter-tag">
+                  {category?.name}
+                  <button
+                    className="remove-tag-btn"
+                    onClick={() => handleRemoveCategory(categoryId)}
+                    aria-label={`Remove ${category?.name}`}
+                  >
+                    ✕
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

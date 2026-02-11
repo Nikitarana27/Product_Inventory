@@ -13,6 +13,7 @@ const AddProduct = ({ categories, onProductAdded, onClose }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [openDropdown, setOpenDropdown] = useState(false);
 
   // Validation rules
   const validateForm = () => {
@@ -199,18 +200,64 @@ const AddProduct = ({ categories, onProductAdded, onClose }) => {
 
           <div className="form-group">
             <label>Categories * (Select at least one)</label>
-            <div className="categories-list">
-              {categories.map((category) => (
-                <label key={category._id} className="category-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={formData.categories.includes(category._id)}
-                    onChange={() => handleCategoryChange(category._id)}
-                    disabled={loading}
-                  />
-                  {category.name}
-                </label>
-              ))}
+            <div className="category-dropdown-container">
+              <div
+                className={`category-dropdown-toggle ${
+                  openDropdown ? 'active' : ''
+                }`}
+                onClick={() => setOpenDropdown(!openDropdown)}
+              >
+                <div className="selected-categories-display">
+                  {formData.categories.length === 0 ? (
+                    <span className="placeholder">Select categories...</span>
+                  ) : (
+                    <div className="selected-category-tags">
+                      {formData.categories.map((categoryId) => {
+                        const category = categories.find(
+                          (cat) => cat._id === categoryId
+                        );
+                        return (
+                          <span key={categoryId} className="category-tag">
+                            {category?.name}
+                            <button
+                              type="button"
+                              className="tag-remove-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCategoryChange(categoryId);
+                              }}
+                              disabled={loading}
+                            >
+                              ✕
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+                <span className={`dropdown-arrow ${openDropdown ? 'open' : ''}`}>
+                  ▼
+                </span>
+              </div>
+
+              {openDropdown && (
+                <div className="category-dropdown-menu">
+                  {categories.map((category) => (
+                    <label key={category._id} className="dropdown-category-item">
+                      <div className='categories-item'>
+                      <input
+                        type="checkbox"
+                        checked={formData.categories.includes(category._id)}
+                        onChange={() => handleCategoryChange(category._id)}
+                        disabled={loading}
+                      />
+                      <div className='categories-name'>{category.name}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
             </div>
             {errors.categories && (
               <span className="error-text">{errors.categories}</span>
