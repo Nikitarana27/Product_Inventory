@@ -55,7 +55,7 @@ const getProducts = async (req, res, next) => {
       : [];
 
     // Build filter object
-    const filter = {};
+    const filter = { flagDeleted: false };
 
     // Search by product name
     if (search.trim()) {
@@ -107,7 +107,7 @@ const getProductById = async (req, res, next) => {
 
     const product = await Product.findById(id).populate('categories');
 
-    if (!product) {
+    if (!product || product.flagDeleted) {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
@@ -129,9 +129,9 @@ const updateProduct = async (req, res, next) => {
     const { id } = req.params;
     const { name, description, quantity, categories } = req.body;
 
-    // Check if product exists
+    // Check if product exists and is not deleted
     const product = await Product.findById(id);
-    if (!product) {
+    if (!product || product.flagDeleted) {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
@@ -181,24 +181,28 @@ const updateProduct = async (req, res, next) => {
   }
 };
 
-// Delete product
+// Delete product (soft delete)
 const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    const product = await Product.findByIdAndDelete(id);
+    const product = await Product.findById(id);
 
-    if (!product) {
+    if (!product || product.flagDeleted) {
       return res.status(404).json({
         success: false,
         message: 'Product not found',
       });
     }
 
+    // Soft delete: set flagDeleted to true
+    product.flagDeleted = true;
+    const deletedProduct = await product.save();
+
     res.json({
       success: true,
       message: 'Product deleted successfully',
-      data: product,
+      data: deletedProduct,
     });
   } catch (error) {
     next(error);

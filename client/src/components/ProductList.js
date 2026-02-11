@@ -77,7 +77,7 @@ const ProductList = ({
         ))}
       </div>
 
-      {totalPages > 1 && (
+      {totalPages > 0 && (
         <div className="pagination">
           <button
             className="pagination-btn"

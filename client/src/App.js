@@ -16,7 +16,7 @@ function App() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [deleteMessage, setDeleteMessage] = useState('');
 
-  const ITEMS_PER_PAGE = 10;
+  const ITEMS_PER_PAGE = 6;
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -40,6 +40,7 @@ function App() {
       );
 
       if (response.data.success) {
+        console.log('Fetched products:', response.data.data.pagination.totalPages);
         setProducts(response.data.data.products);
         setTotalPages(response.data.data.pagination.totalPages);
         setCurrentPage(page);

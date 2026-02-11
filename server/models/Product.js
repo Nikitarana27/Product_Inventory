@@ -30,6 +30,10 @@ const productSchema = new mongoose.Schema(
         required: [true, 'At least one category is required'],
       },
     ],
+    flagDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
